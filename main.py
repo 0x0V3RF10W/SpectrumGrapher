@@ -58,9 +58,10 @@ if __name__ == '__main__':
     parser.add_argument("--start", help="start MHz", type=float, default=925)
     parser.add_argument("--stop", help="stop MHz", type=float, default=955)
     parser.add_argument("--step", help="step kHz", type=float, default=200)
+    parser.add_argument("--attenuation", help="attenuation in dB from 0 to -30", type=int, default=0)
     parser.add_argument("--length", help="length", type=int, default=200)
-    parser.add_argument("--gradient-max", help="max gradient", type=int, default=-60)
-    parser.add_argument("--gradient-min", help="min gradient", type=int, default=-110)
+    parser.add_argument("--gradient-max", help="max gradient", type=int, default=-20)
+    parser.add_argument("--gradient-min", help="min gradient", type=int, default=-100)
     args = parser.parse_args()
 
     start = mhz2hz(args.start)
@@ -71,7 +72,7 @@ if __name__ == '__main__':
     data = []
     max_values = 0
     for _ in range(args.length):
-        result = device.get_scan_range(start, stop, step)
+        result = device.get_scan_range(start, stop, step, args.attenuation)
         max_values = max(len(result), max_values)
         data.append(result)
         sleep(0.001)
@@ -82,7 +83,7 @@ if __name__ == '__main__':
             amplitude_data[amplitude_index][time_index] = data[time_index][amplitude_index] if amplitude_index < len(data[time_index]) else -200
 
     while True:
-        data = device.get_scan_range(start, stop, step)
+        data = device.get_scan_range(start, stop, step, args.attenuation)
         for index in range(0, len(amplitude_data)):
             amplitude_data[index].pop(0)
             amplitude_data[index].append(data[index] if index < len(data) else -200)
